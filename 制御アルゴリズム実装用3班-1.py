@@ -196,22 +196,37 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 #						#
 #################################################
 		#最も目標から遠いセンサを調べる
-		fathestSensor = [0,0]	#センサ番号，目標との差[lx]
+		farthestSensor = 0	#センサ番号
+		diffLx = 0			#目標との差[lx]
 		for j in range(SENSOR_NUM):
 			currentLx = sensor[USE_SENSOR[j]].get_now_illuminance()
 			goalLx = ill_pattern[pattern_num-1][j]
-			diffLx = goalLx - currentLx
-			print(currentLx, goalLx)
-			if(abs(diffLx) > abs(fathestSensor[1])):
-				fathestSensor = [j, diffLx]
+			tmpDiffLx = goalLx - currentLx
+			#print(currentLx, goalLx)
+			if(abs(tmpDiffLx) > abs(diffLx)):
+				farthestSensor = j
+				diffLx = tmpDiffLx
 
 
 		#変更する照明を判断する
-		changedLight = sensorEffects[fathestSensor[0]][0][0]
+		changedLight = -1
+		for i in range(LIGHT_NUM):
+			tmpChangedLight = sensorEffects[farthestSensor][i][0]	#そのセンサに良い照明を順番に格納する
+			if diffLx > 0 and currentCd[tmpChangedLight] < MAX_LUMINANCE:
+				changedLight = tmpChangedLight
+				break
+			elif diffLx < 0 and currentCd[tmpChangedLight] > MIN_LUMINANCE:
+				changedLight = tmpChangedLight
+				break
+
+		print(changedLight, currentCd[changedLight])
+		#print(changedLight, diffLx)
 
 		#調べたセンサの光度を変更する
-		light[changedLight].set_now_cd(currentCd[changedLight] + fathestSensor[1]*0.01)
-		currentCd[changedLight] += fathestSensor[1]*0.1
+		if(changedLight >= 0):
+			nextCd = clamp(currentCd[changedLight]+diffLx*0.1, MIN_LUMINANCE, MAX_LUMINANCE)
+			light[changedLight].set_now_cd(nextCd)
+			currentCd[changedLight] = nextCd
 
 
 ## ill_pattern[1][1] →　パターン1のセンサ１の目標照度
@@ -309,6 +324,9 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 			break
 
 	return step,USE_SENSOR,system_message,message_count
+
+def clamp(value, _min, _max):
+	return max(_min, min(value, _max))
 
 def update_cd(light,LIGHT_NUM):
 	cd_str = ""
