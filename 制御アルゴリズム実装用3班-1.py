@@ -173,27 +173,26 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 	#####################################################
 	##各センサに対する照明ごとの順位（有効さ）を調べる
 	#####################################################
-	sensorEffectsOrder = copy.deepcopy(sensorEffects)
 
 	#有効順に並び替える
 	for j in range(SENSOR_NUM):
-		sensorEffectsOrder[j].sort(key=lambda x:x[1])
-		sensorEffectsOrder[j].reverse()
+		sensorEffects[j].sort(key=lambda x:x[1])
+		sensorEffects[j].reverse()
 
 	#配列の3番目の要素に順位を追加
 	for j in range(SENSOR_NUM):
 		for i in range(LIGHT_NUM):
-			sensorEffectsOrder[j][i].append(i)
+			sensorEffects[j][i].append(i)
 
 	#照明番号順に戻す
 	for j in range(SENSOR_NUM):
-		sensorEffectsOrder[j].sort(key=lambda x:x[0])
+		sensorEffects[j].sort(key=lambda x:x[0])
 
 	#表示
 	for j in range(SENSOR_NUM):
-		print("Orderソート")
+		print("センサ{0}".format(j))
 		for i in range(LIGHT_NUM):
-			print(sensorEffectsOrder[j][i])
+			print(sensorEffects[j][i])
 
 
 
@@ -253,7 +252,7 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 		#変更する照明を判断する
 		changedLight = -1
 		for i in range(LIGHT_NUM):
-			tmpChangedLight = sensorEffectsOrder[farthestSensor][i][0]	#そのセンサに良い照明を順番に格納する
+			tmpChangedLight = sensorEffects[farthestSensor][i][0]	#そのセンサに良い照明を順番に格納する
 			if diffLx > 0 and currentCd[tmpChangedLight] < MAX_LUMINANCE:
 				changedLight = tmpChangedLight
 				break
