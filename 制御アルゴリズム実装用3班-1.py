@@ -171,19 +171,29 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 
 
 	#####################################################
-	##各センサに対して有効な照明順に並び替える
+	##各センサに対する照明ごとの順位（有効さ）を調べる
 	#####################################################
 	sensorEffectsOrder = copy.deepcopy(sensorEffects)
 
-	for i in range(SENSOR_NUM):
-		sensorEffectsOrder[i].sort(key=lambda x:x[1])
-		sensorEffectsOrder[i].reverse()
+	#有効順に並び替える
+	for j in range(SENSOR_NUM):
+		sensorEffectsOrder[j].sort(key=lambda x:x[1])
+		sensorEffectsOrder[j].reverse()
+
+	#配列の3番目の要素に順位を追加
+	for j in range(SENSOR_NUM):
+		for i in range(LIGHT_NUM):
+			sensorEffectsOrder[j][i].append(i)
+
+	#照明番号順に戻す
+	for j in range(SENSOR_NUM):
+		sensorEffectsOrder[j].sort(key=lambda x:x[0])
 
 	#表示
-	for i in range(SENSOR_NUM):
+	for j in range(SENSOR_NUM):
 		print("Orderソート")
-		for j in range(LIGHT_NUM):
-			print(sensorEffectsOrder[i][j])
+		for i in range(LIGHT_NUM):
+			print(sensorEffectsOrder[j][i])
 
 
 
@@ -208,15 +218,18 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 			goalLx = ill_pattern[pattern_num-1][j]
 			diffLx[j] = goalLx - currentLx
 
+
 		#最も絶対値の大きいdiffLxを調べる
 		maxDiff = 0
 		for j in range(SENSOR_NUM):
 			if abs(diffLx[j]) > abs(maxDiff):
 				maxDiff = diffLx[j]
 
+
 		#最も遠いセンサとの比を計算する（比でやるべきかは分からん）
 		diffLxRatio = [diffLx[j]/maxDiff for j in range(SENSOR_NUM)]
 		#print(diffLxRatio)
+
 		"""
 		#各センサにおいて理想の順位となる照明を判断する（この計算式がベストかは分からん）
 		idealOrder = [0 for j in range(SENSOR_NUM)]
