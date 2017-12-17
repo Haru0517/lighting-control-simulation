@@ -7,6 +7,7 @@ import os
 import math
 import random
 import time
+import copy
 
 argv = sys.argv
 argc = len(argv)
@@ -172,15 +173,20 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 	#####################################################
 	##各センサに対して有効な照明順に並び替える
 	#####################################################
+	sensorEffectsOrder = copy.deepcopy(sensorEffects)
+
 	for i in range(SENSOR_NUM):
-		sensorEffects[i].sort(key=lambda x:x[1])
-		sensorEffects[i].reverse()
+		sensorEffectsOrder[i].sort(key=lambda x:x[1])
+		sensorEffectsOrder[i].reverse()
 
 	#表示
 	for i in range(SENSOR_NUM):
-		print("ソート")
+		print("Orderソート")
 		for j in range(LIGHT_NUM):
-			print(sensorEffects[i][j])
+			print(sensorEffectsOrder[i][j])
+
+
+
 
 	#現在光度
 	currentCd = [INITIAL_CD for i in range(LIGHT_NUM)]
@@ -195,23 +201,46 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 #	照明制御アルゴリズムを書くここから	#
 #						#
 #################################################
-		#最も目標から遠いセンサを調べる
-		farthestSensor = 0	#センサ番号
-		diffLx = 0			#目標との差[lx]
+		#全てのセンサの目標との差を調べる
+		diffLx = [0 for j in range(SENSOR_NUM)]			#目標との差[lx]
 		for j in range(SENSOR_NUM):
 			currentLx = sensor[USE_SENSOR[j]].get_now_illuminance()
 			goalLx = ill_pattern[pattern_num-1][j]
-			tmpDiffLx = goalLx - currentLx
-			#print(currentLx, goalLx)
-			if(abs(tmpDiffLx) > abs(diffLx)):
-				farthestSensor = j
-				diffLx = tmpDiffLx
+			diffLx[j] = goalLx - currentLx
+
+		#最も絶対値の大きいdiffLxを調べる
+		maxDiff = 0
+		for j in range(SENSOR_NUM):
+			if abs(diffLx[j]) > abs(maxDiff):
+				maxDiff = diffLx[j]
+
+		#最も遠いセンサとの比を計算する（比でやるべきかは分からん）
+		diffLxRatio = [diffLx[j]/maxDiff for j in range(SENSOR_NUM)]
+		#print(diffLxRatio)
+		"""
+		#各センサにおいて理想の順位となる照明を判断する（この計算式がベストかは分からん）
+		idealOrder = [0 for j in range(SENSOR_NUM)]
+		for j in range(SENSOR_NUM):
+			#(0から14位までに入るようにclampする)
+			idealOrder[j] = clamp(int(LIGHT_NUM*(1-diffLxRatio)), 0, LIGHT_NUM)
+
+
+		#どの照明を変更するか判断する
+		bestLight = -1
+		bestLightValue = 0
+		for i in range(LIGHT_NUM):
+			tmpValue = 0
+			for j in range(SENSOR_NUM):
+				tmpValue += abs()
+
+
+
 
 
 		#変更する照明を判断する
 		changedLight = -1
 		for i in range(LIGHT_NUM):
-			tmpChangedLight = sensorEffects[farthestSensor][i][0]	#そのセンサに良い照明を順番に格納する
+			tmpChangedLight = sensorEffectsOrder[farthestSensor][i][0]	#そのセンサに良い照明を順番に格納する
 			if diffLx > 0 and currentCd[tmpChangedLight] < MAX_LUMINANCE:
 				changedLight = tmpChangedLight
 				break
@@ -227,7 +256,7 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 			nextCd = clamp(currentCd[changedLight]+diffLx*0.1, MIN_LUMINANCE, MAX_LUMINANCE)
 			light[changedLight].set_now_cd(nextCd)
 			currentCd[changedLight] = nextCd
-
+		"""
 
 ## ill_pattern[1][1] →　パターン1のセンサ１の目標照度
 
