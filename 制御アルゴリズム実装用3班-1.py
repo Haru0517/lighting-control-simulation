@@ -244,38 +244,30 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 			for j in range(SENSOR_NUM):
 				tmpValue += abs(sensorEffects[j][i][2]-idealOrder[j])
 			if tmpValue < bestLightValue:
-				bestLight = i
-				bestLightValue = tmpValue
-
-		#print(bestLight)
-		#for j in range(SENSOR_NUM):
-			#print(sensorEffects[j][bestLight][2])
-
-		#選択した照明の光度を変更する
+				if (maxDiff > 0 and currentCd[i] < MAX_LUMINANCE) \
+					or (maxDiff < 0 and MIN_LUMINANCE < currentCd[i]):
+					bestLight = i
+					bestLightValue = tmpValue
 
 
+		#選択した照明の光度を変更する（この変更量が最適かは分からん）
+		if(bestLight >= 0):
+			nextCd = clamp(currentCd[bestLight]+maxDiff*0.1, MIN_LUMINANCE, MAX_LUMINANCE)
+			light[bestLight].set_now_cd(nextCd)
+			currentCd[bestLight] = nextCd
 
-		"""
-		#変更する照明を判断する
-		changedLight = -1
-		for i in range(LIGHT_NUM):
-			tmpChangedLight = sensorEffects[farthestSensor][i][0]	#そのセンサに良い照明を順番に格納する
-			if diffLx > 0 and currentCd[tmpChangedLight] < MAX_LUMINANCE:
-				changedLight = tmpChangedLight
-				break
-			elif diffLx < 0 and currentCd[tmpChangedLight] > MIN_LUMINANCE:
-				changedLight = tmpChangedLight
-				break
 
-		print(changedLight, currentCd[changedLight])
-		#print(changedLight, diffLx)
+		#デバッグ表示
+		print("照明番号:{0}".format(bestLight), end="")
+		print("　順位：", end="")
+		for j in range(SENSOR_NUM):
+			print(sensorEffects[j][bestLight][2],"", end="")
+		print("　理想順位：", end="")
+		for j in range(SENSOR_NUM):
+			print(idealOrder[j],"", end="")
+		print()
 
-		#調べたセンサの光度を変更する
-		if(changedLight >= 0):
-			nextCd = clamp(currentCd[changedLight]+diffLx*0.1, MIN_LUMINANCE, MAX_LUMINANCE)
-			light[changedLight].set_now_cd(nextCd)
-			currentCd[changedLight] = nextCd
-		"""
+
 
 ## ill_pattern[1][1] →　パターン1のセンサ１の目標照度
 
