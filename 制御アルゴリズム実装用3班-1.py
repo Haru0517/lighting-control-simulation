@@ -195,8 +195,6 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 			print(sensorEffects[j][i])
 
 
-
-
 	#現在光度
 	currentCd = [INITIAL_CD for i in range(LIGHT_NUM)]
 
@@ -229,14 +227,15 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 		diffLxRatio = [diffLx[j]/maxDiff for j in range(SENSOR_NUM)]
 		#print(diffLxRatio)
 
-		"""
+
 		#各センサにおいて理想の順位となる照明を判断する（この計算式がベストかは分からん）
 		idealOrder = [0 for j in range(SENSOR_NUM)]
 		for j in range(SENSOR_NUM):
 			#(0から14位までに入るようにclampする)
-			idealOrder[j] = clamp(int(LIGHT_NUM*(1-diffLxRatio)), 0, LIGHT_NUM)
+			idealOrder[j] = clamp(int(LIGHT_NUM*(1-diffLxRatio[j])), 0, LIGHT_NUM)
+		print(idealOrder)
 
-
+		"""
 		#どの照明を変更するか判断する
 		bestLight = -1
 		bestLightValue = 0
@@ -244,11 +243,11 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 			tmpValue = 0
 			for j in range(SENSOR_NUM):
 				tmpValue += abs()
+		"""
 
 
 
-
-
+		"""
 		#変更する照明を判断する
 		changedLight = -1
 		for i in range(LIGHT_NUM):
