@@ -233,17 +233,25 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 		for j in range(SENSOR_NUM):
 			#(0から14位までに入るようにclampする)
 			idealOrder[j] = clamp(int(LIGHT_NUM*(1-diffLxRatio[j])), 0, LIGHT_NUM)
-		print(idealOrder)
+		#print(idealOrder)
 
-		"""
-		#どの照明を変更するか判断する
+
+		#idealOrderに基づいて，どの照明を変更するのが効果的か判断する
 		bestLight = -1
-		bestLightValue = 0
+		bestLightValue = 100		#とりあえず大きい数字入れとく
 		for i in range(LIGHT_NUM):
 			tmpValue = 0
 			for j in range(SENSOR_NUM):
-				tmpValue += abs()
-		"""
+				tmpValue += abs(sensorEffects[j][i][2]-idealOrder[j])
+			if tmpValue < bestLightValue:
+				bestLight = i
+				bestLightValue = tmpValue
+
+		#print(bestLight)
+		#for j in range(SENSOR_NUM):
+			#print(sensorEffects[j][bestLight][2])
+
+		#選択した照明の光度を変更する
 
 
 
