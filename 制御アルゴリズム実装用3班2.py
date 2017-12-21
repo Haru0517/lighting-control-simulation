@@ -188,7 +188,7 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 	#print("センサー1 センサー2 センサー3")
 	print("照明番号 現在の光度　光度の変化量")
 	file= open("result.txt","w")#書き込みモードでオープン
-	numCd=0
+	diffCd=0
 	while(True):
 
 
@@ -200,11 +200,11 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 		#最も目標から遠いセンサを調べる
 		farthestSensor = 0	#センサ番号
 		diffLx = 0			#目標との差[lx]
+		currentLx = [0 for j in range(SENSOR_NUM)]	#現在の照度
 		for j in range(SENSOR_NUM):
-			currentLx = sensor[USE_SENSOR[j]].get_now_illuminance()
+			currentLx[j] = sensor[USE_SENSOR[j]].get_now_illuminance()
 			goalLx = ill_pattern[pattern_num-1][j]
-			tmpDiffLx = goalLx - currentLx
-			#print(currentLx, goalLx)
+			tmpDiffLx = goalLx - currentLx[j]
 			if(abs(tmpDiffLx) > abs(diffLx)):
 				farthestSensor = j
 				diffLx = tmpDiffLx
@@ -220,30 +220,27 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 			elif diffLx < 0 and currentCd[tmpChangedLight] > MIN_LUMINANCE:
 				changedLight = tmpChangedLight
 				break
-		print("{0} {1}".format(changedLight,currentCd[changedLight]))
+
 
 		#ファイルに照明番号の光度の変化を出力ｓる
-		file.write("{0} {1} {2}\n".format(changedLight,currentCd[changedLight],numCd))
-
-		#print(incCd)
+		file.write("{0} {1} {2}\n".format(changedLight,currentCd[changedLight],diffCd))
 
 
-		currentLx0 = sensor[USE_SENSOR[0]].get_now_illuminance()
-		currentLx1 = sensor[USE_SENSOR[1]].get_now_illuminance()
-		currentLx2 = sensor[USE_SENSOR[2]].get_now_illuminance()
-		#print("センサー1：{0},センサー2：{1}，センサー3：{2}照度".format(currentLx0,currentLx1,currentLx2))
-
-		#print("{0} {1} {2}".format(currentLx0,currentLx1,currentLx2))
-
-		#print(changedLight, diffLx)
-		print(changedLight)
 		#調べたセンサの光度を変更する
 		if(changedLight >= 0):
-			nextCd = clamp(currentCd[changedLight]+diffLx*0.1, MIN_LUMINANCE, MAX_LUMINANCE)
+			nextCd = clamp(currentCd[changedLight]+diffLx*1, MIN_LUMINANCE, MAX_LUMINANCE)
 			light[changedLight].set_now_cd(nextCd)
-			numCd = nextCd-currentCd[changedLight]
-			print("numCd:{0}".format(numCd))
+			diffCd = nextCd-currentCd[changedLight]
 			currentCd[changedLight] = nextCd
+
+
+		#デバッグ表示
+		print("照明番号:{0}".format(changedLight), end="")
+		print("　現在光度：{0}".format(currentCd[changedLight]), end="")
+		print("　光度変更量：{:+.1f}".format(diffCd), end="")
+		for j in range(SENSOR_NUM):
+			print("　センサ{0}：{1}".format(j, currentLx[j]), end="")
+		print()
 
 
 
@@ -920,11 +917,11 @@ def load_image(filename, colorkey=None):
 
 
 if __name__ == '__main__':
-	USE_SENSOR = [16,46,97] # pattern 1,2
-#	USE_SENSOR = [16,60,73] # pattern 3
+#	USE_SENSOR = [16,46,97] # pattern 1,2
+	USE_SENSOR = [16,60,73] # pattern 3
 #	USE_SENSOR = [46,49,73] # pattern 4
 #	USE_SENSOR = [46,49,73,76] # pattern 5
-	pattern_num = 1
+	pattern_num = 3
 
 	system_message = ''
 	message_count = 0
