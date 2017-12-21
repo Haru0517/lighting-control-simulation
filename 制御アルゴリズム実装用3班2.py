@@ -239,10 +239,10 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 		print(changedLight)
 		#調べたセンサの光度を変更する
 		if(changedLight >= 0):
-			nextCd = clamp(currentCd[changedLight]+diffLx*0.1, MIN_LUMINANCE, MAX_LUMINANCE)
+			nextCd = clamp(currentCd[changedLight]+diffLx*1, MIN_LUMINANCE, MAX_LUMINANCE)
 			light[changedLight].set_now_cd(nextCd)
 			numCd = nextCd-currentCd[changedLight]
-			print("numCd:{0}".format(numCd))
+			#print("numCd:{0}".format(numCd))
 			currentCd[changedLight] = nextCd
 
 
@@ -920,11 +920,11 @@ def load_image(filename, colorkey=None):
 
 
 if __name__ == '__main__':
-	USE_SENSOR = [16,46,97] # pattern 1,2
-#	USE_SENSOR = [16,60,73] # pattern 3
+#	USE_SENSOR = [16,46,97] # pattern 1,2
+	USE_SENSOR = [16,60,73] # pattern 3
 #	USE_SENSOR = [46,49,73] # pattern 4
 #	USE_SENSOR = [46,49,73,76] # pattern 5
-	pattern_num = 1
+	pattern_num = 3
 
 	system_message = ''
 	message_count = 0
