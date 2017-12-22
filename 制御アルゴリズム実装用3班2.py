@@ -148,7 +148,7 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 	#################################################
 	## 全ての照明の各センサに対する影響度を調べる
 	#################################################
-
+	#[0,0] = [照明番号，影響度]
 	sensorEffects =  [[[0,0] for i in range(LIGHT_NUM)] for j in range(SENSOR_NUM)]
 
 	#それぞれの照明を1個ずつ最大照度にする
@@ -238,7 +238,7 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 
 		#調べたセンサの光度を変更する
 		if(changedLight >= 0):
-			nextCd = clamp(currentCd[changedLight]+diffLx*1, MIN_LUMINANCE, MAX_LUMINANCE)
+			nextCd = clamp(currentCd[changedLight]+diffLx*1.02, MIN_LUMINANCE, MAX_LUMINANCE)
 			light[changedLight].set_now_cd(nextCd)
 			diffCd = nextCd-currentCd[changedLight]
 			currentCd[changedLight] = nextCd
