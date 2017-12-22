@@ -186,7 +186,7 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 	currentCd = [INITIAL_CD for i in range(LIGHT_NUM)]
 
 	#print("センサー1 センサー2 センサー3")
-	print("照明番号 現在の光度　光度の変化量")
+	#print("照明番号 現在の光度　光度の変化量")
 	file= open("result.csv","w")#書き込みモードでオープン
 	for i in range(LIGHT_NUM):
 		file.write("照明{0},".format(i))

@@ -198,6 +198,12 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 	#現在光度
 	currentCd = [INITIAL_CD for i in range(LIGHT_NUM)]
 
+	file= open("result2.csv","w")#書き込みモードでオープン
+	for i in range(LIGHT_NUM):
+		file.write("照明{0},".format(i))
+	for j in range(SENSOR_NUM):
+		file.write("センサ{0},".format(j))
+	file.write("\n")
 
 	while(True):
 
@@ -210,10 +216,11 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 #################################################
 		#全てのセンサの目標との差を調べる
 		diffLx = [0 for j in range(SENSOR_NUM)]			#目標との差[lx]
+		currentLx = [0 for j in range(SENSOR_NUM)]	#現在の照度
 		for j in range(SENSOR_NUM):
-			currentLx = sensor[USE_SENSOR[j]].get_now_illuminance()
+			currentLx[j] = sensor[USE_SENSOR[j]].get_now_illuminance()
 			goalLx = ill_pattern[pattern_num-1][j]
-			diffLx[j] = goalLx - currentLx
+			diffLx[j] = goalLx - currentLx[j]
 
 
 		#最も絶対値の大きいdiffLxを調べる
@@ -252,9 +259,17 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 
 		#選択した照明の光度を変更する（この変更量が最適かは分からん）
 		if(bestLight >= 0):
-			nextCd = clamp(currentCd[bestLight]+maxDiff*0.1, MIN_LUMINANCE, MAX_LUMINANCE)
+			nextCd = clamp(currentCd[bestLight]+maxDiff*0.5, MIN_LUMINANCE, MAX_LUMINANCE)
 			light[bestLight].set_now_cd(nextCd)
 			currentCd[bestLight] = nextCd
+
+
+		#ファイルに照明番号の光度の変化を出力する
+		for i in range(LIGHT_NUM):
+			file.write("{0},".format(currentCd[i]))
+		for j in range(SENSOR_NUM):
+			file.write("{0},".format(currentLx[j]))
+		file.write("\n")
 
 
 		#デバッグ表示
