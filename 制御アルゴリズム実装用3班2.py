@@ -187,7 +187,12 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 
 	#print("センサー1 センサー2 センサー3")
 	print("照明番号 現在の光度　光度の変化量")
-	file= open("result.txt","w")#書き込みモードでオープン
+	file= open("result.csv","w")#書き込みモードでオープン
+	for i in range(LIGHT_NUM):
+		file.write("照明{0},".format(i))
+	for j in range(SENSOR_NUM):
+		file.write("センサ{0},".format(j))
+	file.write("\n")
 	diffCd=0
 	while(True):
 
@@ -222,8 +227,13 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 				break
 
 
-		#ファイルに照明番号の光度の変化を出力ｓる
-		file.write("{0} {1} {2}\n".format(changedLight,currentCd[changedLight],diffCd))
+		#ファイルに照明番号の光度の変化を出力する
+		for i in range(LIGHT_NUM):
+			file.write("{0},".format(currentCd[i]))
+		for j in range(SENSOR_NUM):
+			file.write("{0},".format(currentLx[j]))
+		file.write("\n")
+		#file.write("{0},{1},{2}\n".format(changedLight,currentCd[changedLight],diffCd))
 
 
 		#調べたセンサの光度を変更する
@@ -917,11 +927,11 @@ def load_image(filename, colorkey=None):
 
 
 if __name__ == '__main__':
-#	USE_SENSOR = [16,46,97] # pattern 1,2
-	USE_SENSOR = [16,60,73] # pattern 3
+	USE_SENSOR = [16,46,97] # pattern 1,2
+#	USE_SENSOR = [16,60,73] # pattern 3
 #	USE_SENSOR = [46,49,73] # pattern 4
 #	USE_SENSOR = [46,49,73,76] # pattern 5
-	pattern_num = 3
+	pattern_num = 1
 
 	system_message = ''
 	message_count = 0
