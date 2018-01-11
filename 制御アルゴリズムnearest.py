@@ -148,7 +148,7 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 	#################################################
 	## 全ての照明の各センサに対する影響度を調べる
 	#################################################
-
+	#[0,0] = [照明番号，影響度]
 	sensorEffects =  [[[0,0] for i in range(LIGHT_NUM)] for j in range(SENSOR_NUM)]
 
 	#それぞれの照明を1個ずつ最大照度にする
@@ -185,9 +185,16 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 	#現在光度
 	currentCd = [INITIAL_CD for i in range(LIGHT_NUM)]
 
-
+	#print("センサー1 センサー2 センサー3")
+	#print("照明番号 現在の光度　光度の変化量")
+	file= open("result.csv","w")#書き込みモードでオープン
+	for i in range(LIGHT_NUM):
+		file.write("照明{0},".format(i))
+	for j in range(SENSOR_NUM):
+		file.write("センサ{0},".format(j))
+	file.write("\n")
+	diffCd=0
 	while(True):
-
 
 
 #################################################
@@ -198,11 +205,11 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 		#最も目標から遠いセンサを調べる
 		farthestSensor = 0	#センサ番号
 		diffLx = 0			#目標との差[lx]
+		currentLx = [0 for j in range(SENSOR_NUM)]	#現在の照度
 		for j in range(SENSOR_NUM):
-			currentLx = sensor[USE_SENSOR[j]].get_now_illuminance()
+			currentLx[j] = sensor[USE_SENSOR[j]].get_now_illuminance()
 			goalLx = ill_pattern[pattern_num-1][j]
-			tmpDiffLx = goalLx - currentLx
-			#print(currentLx, goalLx)
+			tmpDiffLx = goalLx - currentLx[j]
 			if(abs(tmpDiffLx) > abs(diffLx)):
 				farthestSensor = j
 				diffLx = tmpDiffLx
@@ -219,14 +226,32 @@ def main(mode,USE_SENSOR,system_message,message_count,pattern_num):
 				changedLight = tmpChangedLight
 				break
 
-		print(changedLight, currentCd[changedLight])
-		#print(changedLight, diffLx)
+
+		#ファイルに照明番号の光度の変化を出力する
+		for i in range(LIGHT_NUM):
+			file.write("{0},".format(currentCd[i]))
+		for j in range(SENSOR_NUM):
+			file.write("{0},".format(currentLx[j]))
+		file.write("\n")
+		#file.write("{0},{1},{2}\n".format(changedLight,currentCd[changedLight],diffCd))
+
 
 		#調べたセンサの光度を変更する
 		if(changedLight >= 0):
-			nextCd = clamp(currentCd[changedLight]+diffLx*0.1, MIN_LUMINANCE, MAX_LUMINANCE)
+			nextCd = clamp(currentCd[changedLight]+diffLx*1.02, MIN_LUMINANCE, MAX_LUMINANCE)
 			light[changedLight].set_now_cd(nextCd)
+			diffCd = nextCd-currentCd[changedLight]
 			currentCd[changedLight] = nextCd
+
+
+		#デバッグ表示
+		print("照明番号:{0}".format(changedLight), end="")
+		print("　現在光度：{0}".format(currentCd[changedLight]), end="")
+		print("　光度変更量：{:+.1f}".format(diffCd), end="")
+		for j in range(SENSOR_NUM):
+			print("　センサ{0}：{1}".format(j, currentLx[j]), end="")
+		print()
+
 
 
 ## ill_pattern[1][1] →　パターン1のセンサ１の目標照度
